@@ -7,6 +7,8 @@ function ResumeEditor({ data, onChange, geminiKey, onOpenSettings }) {
   const [loadingSection, setLoadingSection] = useState(null); // null | 'selfPR' | 'motivation' | 'parseCV'
   const [cvText, setCvText] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
+  const [prMode, setPrMode] = useState('manual'); // 'manual' | 'ai'
+  const [motivationMode, setMotivationMode] = useState('manual'); // 'manual' | 'ai'
 
   const updatePersonalInfo = (field, value) => {
     onChange({
@@ -380,50 +382,148 @@ function ResumeEditor({ data, onChange, geminiKey, onOpenSettings }) {
           <div className="space-y-6 animate-fade-in">
             {/* Self-PR Section */}
             <div className="editor-section-card">
-              <h3 className="font-bold text-lg border-b border-zinc-200 dark:border-zinc-800 pb-3 mb-4">Self-PR (自己PR)</h3>
-              <div className="space-y-4">
-                <div className="form-group">
-                  <label className="form-label">Self-PR in English</label>
-                  <textarea className="form-input form-textarea" placeholder="Describe your key strengths, achievements, and technical expertise..." value={data.selfPR || ''} onChange={(e) => onChange({ ...data, selfPR: e.target.value })} />
-                </div>
-                
-                <div className="flex items-center gap-3">
-                  <button className="btn btn-primary py-2 px-4 text-xs flex items-center gap-1.5" onClick={() => handleAITranslate('selfPR')} disabled={loadingSection === 'selfPR'}>
-                    <Sparkles size={14} className={loadingSection === 'selfPR' ? 'animate-spin' : ''} />
-                    {loadingSection === 'selfPR' ? 'Translating...' : 'Translate & Refine (AI)'}
-                  </button>
-                  <p className="text-[10px] text-zinc-500 font-medium">Uses Gemini to translate into professional business Keigo</p>
-                </div>
-
-                <div className="form-group mt-3">
-                  <label className="form-label">Japanese Self-PR (Output Area)</label>
-                  <textarea className="form-input form-textarea" style={{ height: '140px' }} value={data.selfPRJapanese || ''} onChange={(e) => onChange({ ...data, selfPRJapanese: e.target.value })} placeholder="AI-generated or manual Japanese text..." />
-                </div>
+              <h3 className="font-bold text-lg border-b border-zinc-200 dark:border-zinc-800 pb-3 mb-3">Self-PR (自己PR)</h3>
+              
+              <div className="tab-container no-print" style={{ marginBottom: '1.25rem', padding: '3px', borderRadius: '8px' }}>
+                <button 
+                  type="button" 
+                  className={`tab-btn ${prMode === 'manual' ? 'active' : ''}`}
+                  onClick={() => setPrMode('manual')}
+                  style={{ padding: '0.4rem 0.875rem', fontSize: '0.75rem' }}
+                >
+                  ✍️ Write Manually
+                </button>
+                <button 
+                  type="button" 
+                  className={`tab-btn ${prMode === 'ai' ? 'active' : ''}`}
+                  onClick={() => setPrMode('ai')}
+                  style={{ padding: '0.4rem 0.875rem', fontSize: '0.75rem' }}
+                >
+                  ✨ AI Assistant
+                </button>
               </div>
+
+              {prMode === 'manual' ? (
+                <div className="form-group animate-fade-in">
+                  <label className="form-label">Write your Japanese Self-PR directly</label>
+                  <textarea 
+                    className="form-input form-textarea" 
+                    style={{ height: '180px' }} 
+                    value={data.selfPRJapanese || ''} 
+                    onChange={(e) => onChange({ ...data, selfPRJapanese: e.target.value })} 
+                    placeholder="自己PRを日本語で入力してください..." 
+                  />
+                </div>
+              ) : (
+                <div className="space-y-4 animate-fade-in">
+                  <div className="form-group">
+                    <label className="form-label">Self-PR in English</label>
+                    <textarea 
+                      className="form-input form-textarea" 
+                      placeholder="Describe your key strengths, achievements, and technical expertise..." 
+                      value={data.selfPR || ''} 
+                      onChange={(e) => onChange({ ...data, selfPR: e.target.value })} 
+                    />
+                  </div>
+                  
+                  <div className="flex items-center gap-3">
+                    <button 
+                      type="button"
+                      className="btn btn-primary py-2 px-4 text-xs flex items-center gap-1.5" 
+                      onClick={() => handleAITranslate('selfPR')} 
+                      disabled={loadingSection === 'selfPR'}
+                    >
+                      <Sparkles size={14} className={loadingSection === 'selfPR' ? 'animate-spin' : ''} />
+                      {loadingSection === 'selfPR' ? 'Translating...' : 'Translate & Refine (AI)'}
+                    </button>
+                    <p className="text-[10px] text-zinc-500 font-medium">Uses Gemini to translate into professional business Keigo</p>
+                  </div>
+
+                  <div className="form-group mt-3">
+                    <label className="form-label">Generated Japanese Self-PR</label>
+                    <textarea 
+                      className="form-input form-textarea" 
+                      style={{ height: '140px' }} 
+                      value={data.selfPRJapanese || ''} 
+                      onChange={(e) => onChange({ ...data, selfPRJapanese: e.target.value })} 
+                      placeholder="AI generated text will appear here. You can also edit it..." 
+                    />
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Motivation Section */}
             <div className="editor-section-card">
-              <h3 className="font-bold text-lg border-b border-zinc-200 dark:border-zinc-800 pb-3 mb-4">Motivation (志望動機)</h3>
-              <div className="space-y-4">
-                <div className="form-group">
-                  <label className="form-label">Motivation in English</label>
-                  <textarea className="form-input form-textarea" placeholder="Why do you want to join this company? Why work in Japan?..." value={data.motivation || ''} onChange={(e) => onChange({ ...data, motivation: e.target.value })} />
-                </div>
+              <h3 className="font-bold text-lg border-b border-zinc-200 dark:border-zinc-800 pb-3 mb-3">Motivation (志望動機)</h3>
 
-                <div className="flex items-center gap-3">
-                  <button className="btn btn-primary py-2 px-4 text-xs flex items-center gap-1.5" onClick={() => handleAITranslate('motivation')} disabled={loadingSection === 'motivation'}>
-                    <Sparkles size={14} className={loadingSection === 'motivation' ? 'animate-spin' : ''} />
-                    {loadingSection === 'motivation' ? 'Translating...' : 'Translate & Refine (AI)'}
-                  </button>
-                  <p className="text-[10px] text-zinc-500 font-medium">Uses Gemini to translate into polite resume format</p>
-                </div>
-
-                <div className="form-group mt-3">
-                  <label className="form-label">Japanese Motivation (Output Area)</label>
-                  <textarea className="form-input form-textarea" style={{ height: '120px' }} value={data.motivationJapanese || ''} onChange={(e) => onChange({ ...data, motivationJapanese: e.target.value })} placeholder="AI-generated or manual Japanese text..." />
-                </div>
+              <div className="tab-container no-print" style={{ marginBottom: '1.25rem', padding: '3px', borderRadius: '8px' }}>
+                <button 
+                  type="button" 
+                  className={`tab-btn ${motivationMode === 'manual' ? 'active' : ''}`}
+                  onClick={() => setMotivationMode('manual')}
+                  style={{ padding: '0.4rem 0.875rem', fontSize: '0.75rem' }}
+                >
+                  ✍️ Write Manually
+                </button>
+                <button 
+                  type="button" 
+                  className={`tab-btn ${motivationMode === 'ai' ? 'active' : ''}`}
+                  onClick={() => setMotivationMode('ai')}
+                  style={{ padding: '0.4rem 0.875rem', fontSize: '0.75rem' }}
+                >
+                  ✨ AI Assistant
+                </button>
               </div>
+
+              {motivationMode === 'manual' ? (
+                <div className="form-group animate-fade-in">
+                  <label className="form-label">Write your Japanese Motivation directly</label>
+                  <textarea 
+                    className="form-input form-textarea" 
+                    style={{ height: '160px' }} 
+                    value={data.motivationJapanese || ''} 
+                    onChange={(e) => onChange({ ...data, motivationJapanese: e.target.value })} 
+                    placeholder="志望動機を日本語で入力してください..." 
+                  />
+                </div>
+              ) : (
+                <div className="space-y-4 animate-fade-in">
+                  <div className="form-group">
+                    <label className="form-label">Motivation in English</label>
+                    <textarea 
+                      className="form-input form-textarea" 
+                      placeholder="Why do you want to join this company? Why work in Japan?..." 
+                      value={data.motivation || ''} 
+                      onChange={(e) => onChange({ ...data, motivation: e.target.value })} 
+                    />
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <button 
+                      type="button"
+                      className="btn btn-primary py-2 px-4 text-xs flex items-center gap-1.5" 
+                      onClick={() => handleAITranslate('motivation')} 
+                      disabled={loadingSection === 'motivation'}
+                    >
+                      <Sparkles size={14} className={loadingSection === 'motivation' ? 'animate-spin' : ''} />
+                      {loadingSection === 'motivation' ? 'Translating...' : 'Translate & Refine (AI)'}
+                    </button>
+                    <p className="text-[10px] text-zinc-500 font-medium">Uses Gemini to translate into polite resume format</p>
+                  </div>
+
+                  <div className="form-group mt-3">
+                    <label className="form-label">Generated Japanese Motivation</label>
+                    <textarea 
+                      className="form-input form-textarea" 
+                      style={{ height: '120px' }} 
+                      value={data.motivationJapanese || ''} 
+                      onChange={(e) => onChange({ ...data, motivationJapanese: e.target.value })} 
+                      placeholder="AI generated text will appear here. You can also edit it..." 
+                    />
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Minor Options Card */}
