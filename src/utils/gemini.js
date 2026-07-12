@@ -62,6 +62,26 @@ async function callGemini(apiKey, prompt, jsonMode = false) {
  * Translates and localizes Self-PR / Motivation sections into professional Japanese (Keigo/Kenjougo).
  */
 export async function translateToJapaneseBusiness(apiKey, englishText, sectionType = "Self-PR") {
+  if (!apiKey) {
+    const response = await fetch('/api/ai', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        action: 'translate',
+        text: englishText,
+        sectionType
+      })
+    });
+    if (!response.ok) {
+      const err = await response.json();
+      throw new Error(err.error || 'Server translation error');
+    }
+    const data = await response.json();
+    return data.result;
+  }
+
   const prompt = `You are a professional Japanese career consultant.
 Translate the following English ${sectionType} statement from a candidate's CV into natural, polished business Japanese (Rirekisho/Shokumukeirekisho standard).
 Follow these guidelines:
@@ -80,6 +100,24 @@ English Text:
  * Parses raw pasted CV text into the structured resume JSON schema.
  */
 export async function parseCvText(apiKey, rawCvText) {
+  if (!apiKey) {
+    const response = await fetch('/api/ai', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        action: 'parse',
+        text: rawCvText
+      })
+    });
+    if (!response.ok) {
+      const err = await response.json();
+      throw new Error(err.error || 'Server parsing error');
+    }
+    return await response.json();
+  }
+
   const jsonSchema = {
     personalInfo: {
       fullName: "Full name",

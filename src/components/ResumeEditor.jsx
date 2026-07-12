@@ -59,12 +59,6 @@ function ResumeEditor({ data, onChange, geminiKey, onOpenSettings }) {
 
   // AI Translation helper
   const handleAITranslate = async (section) => {
-    if (!geminiKey) {
-      setErrorMsg("Please add your Gemini API Key in the settings (top-right Key icon) to enable AI translation.");
-      onOpenSettings();
-      return;
-    }
-    
     const englishText = section === 'selfPR' ? data.selfPR : data.motivation;
     if (!englishText || englishText.trim() === "") {
       alert("Please enter some English text first to translate.");
@@ -81,7 +75,7 @@ function ResumeEditor({ data, onChange, geminiKey, onOpenSettings }) {
       });
     } catch (err) {
       console.error(err);
-      setErrorMsg(err.message || "Failed to translate. Please check your API key.");
+      setErrorMsg(err.message || "Failed to translate. Please verify your internet connection or backend configuration.");
     } finally {
       setLoadingSection(null);
     }
@@ -89,11 +83,6 @@ function ResumeEditor({ data, onChange, geminiKey, onOpenSettings }) {
 
   // AI CV Parser helper
   const handleAIParse = async () => {
-    if (!geminiKey) {
-      setErrorMsg("Please add your Gemini API Key in the settings (top-right Key icon) to enable AI parsing.");
-      onOpenSettings();
-      return;
-    }
     if (!cvText || cvText.trim() === "") {
       alert("Please paste your raw CV text first.");
       return;
